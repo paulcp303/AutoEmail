@@ -1,0 +1,100 @@
+一：
+//将datagrid数据放到数组里
+for (var i = 0; i < rows.length; i++) {
+                            //判断录入数据行不为空插入数据库
+                            if (rows[i].Problem_Times != "" && rows[i].Problem_Times != null && rows[i].Problem_Times != "undefined") {
+                                //将不为空记录遍历放到数组list中等待传至后台
+                                list.push({
+                                    Node_Id: rows[i].NodeId,
+                                    Problem_Times: rows[i].Problem_Times,
+                                    Problem_Details: rows[i].Problem_Details,
+                                    REDUCE_SCORES: rows[i].Problem_Times * rows[i].TotalScore,
+                                    GROUP_ID: groupid,
+                                    ORGANIZATIONID: $('#txt_departmentselect').combobox('getValue'),
+                                    PATIENT_ID: $('#txt_patientid').val(),
+                                    PATIENT_NAME: $('#txt_patientname').val(),
+                                    BED_ID: $('#txt_BedID').val(),
+                                    DIAGNOSE: $('#txt_Diagnose').val(),
+                                    CHECK_DATE: date
+                                });
+                            }
+                        };
+//传后台
+$.ajax({
+        url: '/QualityControl/CheckTask/AjaxServicelxj.aspx?'+where,
+        type: "POST",
+        data: { "data": JSON.stringify(list) },
+        dataType: 'text',
+        success: function (data) {
+            alert(data);
+            editIndex = undefined;
+            if (data == "保存成功!") {
+                $('.easyui-textbox').val('');
+                //页面返回“开始评分”前状态
+                $('#txt_departmentselect').combobox('readonly', false);
+                $('#a_begin').css('display', 'inline-block');
+                $('#a_cancel').css('display', 'none');
+                $('#a_save').css('display', 'none');
+                
+                //移除datagrid总之前数据
+                grid_tq_standards_formatter.deleteAll();
+                $('#DepartmentTable').datagrid('clearSelections').datagrid('reload');
+
+            } else {
+
+            }
+        }
+    });
+
+//后台
+ public void Insertcheckpatient()
+        {
+            
+
+            string table = Request.QueryString["table"].ToString();
+
+            //string query = Request["query"].ToString();
+
+            string department = RequestHelper.GetString("department", "");
+
+            string groupid = RequestHelper.GetString("groupid", "");
+
+            string patientid = RequestHelper.GetString("patientid", "");
+
+            string yearmonth = DateTime.Now.ToString("yyyy-MM");
+
+            string data = RequestHelper.GetString("data");
+
+            String day = DateTime.Now.ToString("yyyy-MM-dd");
+
+            var act = new DBUtilityV2.MAction(table);
+
+            string where = "GROUP_ID='" + groupid + "'" +" and PATIENT_ID='" + patientid + "' and ORGANIZATIONID=" + department + " and Convert(CHECK_DATE,CHAR(20)) like '" + yearmonth + "%'";
+            List<Tab_TQ_CHECK_DETAILRESULT> lt = JsonConvert.DeserializeObject<List<Tab_TQ_CHECK_DETAILRESULT>>(data);
+            DataTable dt = act.Select(where);
+            if (dt.Rows.Count == 0)
+            {
+                int i = 0;//返回的记录数
+                foreach (var obj in lt)
+                {
+                    //生成GUID字段，作为问题记录的主键
+                    string newid = GuidUtil.New32Lower();
+                    obj.DETAIL_ID = newid;
+                    i = act.SetEntityToMDataRow(obj).Insert();
+                }
+                if (i < 1)
+                {
+                    Response.Write(act.MyException.Message);
+                    return;
+                }
+                Response.Write("保存成功!");
+
+
+            }
+            else
+            {
+                Response.Write("您要检查的患者的记录已经被录入，不能重复录入！");
+                return;
+            }
+
+        }

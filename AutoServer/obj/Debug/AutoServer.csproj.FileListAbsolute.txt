@@ -1,0 +1,6 @@
+H:\个人项目\AutoSendEmail\AutoServer\bin\Debug\AutoServer.exe.config
+H:\个人项目\AutoSendEmail\AutoServer\bin\Debug\AutoServer.exe
+H:\个人项目\AutoSendEmail\AutoServer\bin\Debug\AutoServer.pdb
+H:\个人项目\AutoSendEmail\AutoServer\obj\Debug\AutoServer.exe
+H:\个人项目\AutoSendEmail\AutoServer\obj\Debug\AutoServer.pdb
+H:\个人项目\AutoSendEmail\AutoServer\obj\Debug\AutoServer.csprojResolveAssemblyReference.cache
